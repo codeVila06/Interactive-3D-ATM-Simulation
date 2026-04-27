@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C3231 – UBA Virtual ATM · Architecture &amp; Flowchart</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --accent: #D0202E;
+      --bg:     #f0f2f5;
+      --card:   #ffffff;
+      --text:   #1e2330;
+      --muted:  #6b7280;
+      --border: #e2e6ea;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── PAGE WRAPPER ─────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      padding: 40px 48px 60px;
+      page-break-after: always;
+    }
+
+    .page + .page { border-top: 3px dashed #ccc; }
+
+    /* ── HEADER ───────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 18px;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .page-header h1 span {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .project-meta {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .meta-chip b { color: var(--text); font-size: 13px; }
+
+    /* ── DIAGRAM CARD ─────────────────────────────── */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    .diagram-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .diagram-card-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .diagram-card-header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .icon-box {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .diagram-body {
+      padding: 24px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .diagram-body .mermaid {
+      min-width: 600px;
+    }
+
+    /* ── LEGEND ───────────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .legend-dot {
+      width: 14px; height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── KEY TABLE ────────────────────────────────── */
+    .key-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 24px;
+    }
+
+    .key-table th {
+      background: #f8f9fa;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .key-table td {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .key-table tr:nth-child(even) td { background: #fafbfc; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: #f1f3f5;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    /* ── PRINT ────────────────────────────────────── */
+    @media print {
+      body { background: white; }
+      .page { padding: 20px 28px 40px; }
+      .page + .page { border-top: none; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1 — ARCHITECTURE DIAGRAM
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <h1>System Architecture Diagram
+      <span>C3231 – Computer Graphics &amp; Multimedia · UBA Virtual ATM Simulation</span>
+    </h1>
+    <span class="badge">Architecture</span>
+  </div>
+
+  <div class="project-meta">
+    <div class="meta-chip">Course <b>C3231</b></div>
+    <div class="meta-chip">Stack <b>Three.js · GSAP · Webpack 5 · Web Audio · Web Speech</b></div>
+    <div class="meta-chip">Pattern <b>Two-tier render · Finite State Machine</b></div>
+    <div class="meta-chip">Runtime <b>Browser (Vanilla JS, no framework)</b></div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-card-header">
+      <div class="icon-box" style="background:#dbeafe">🏗️</div>
+      <div>
+        <h2>Component Architecture — Layer View</h2>
+        <p>Shows how the build system, rendering engine, UI overlay, state machine, and I/O subsystems interconnect.</p>
+      </div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+%%{init:{"theme":"base","themeVariables":{"primaryColor":"#dbeafe","primaryTextColor":"#1e2330","primaryBorderColor":"#3b82f6","lineColor":"#64748b","secondaryColor":"#dcfce7","tertiaryColor":"#fef3c7","background":"#ffffff","mainBkg":"#ffffff","nodeBorder":"#94a3b8","clusterBkg":"#f8fafc","titleColor":"#1e2330","edgeLabelBackground":"#ffffff","fontSize":"13px"}}}%%
+graph TB
+
+  %% ── BUILD ──────────────────────────────────────────────────────
+  subgraph BUILD["  🏗️  BUILD SYSTEM"]
+    direction LR
+    WP["<b>Webpack 5</b><br/>babel-loader · css-loader<br/>CopyWebpackPlugin<br/>MiniCSSExtractPlugin"]
+    ENTRY["Entry<br/><code>src/script.js</code>"]
+    OUT["Output<br/><code>dist/bundle.[hash].js</code><br/><code>dist/main.css</code><br/><code>dist/index.html</code>"]
+    ENTRY --> WP --> OUT
+  end
+
+  %% ── 3D ENGINE ──────────────────────────────────────────────────
+  subgraph THREE["  🎮  THREE.JS 3D ENGINE  (canvas z:1)"]
+    direction TB
+
+    subgraph SCENE_G["Scene Graph"]
+      direction LR
+      ATM_M["<b>ATM Machine</b><br/>25+ BoxGeometry<br/>MeshStandardMaterial<br/>shadow casting"]
+      CHAR_M["<b>3D Character</b><br/>Head · Body · Torso<br/>Arms (pivot groups)<br/>Legs · Shoes"]
+      ROOM_M["<b>Bank Room</b><br/>Walls · Floor<br/>Ceiling lamp panel<br/>Fog"]
+    end
+
+    subgraph LIGHTS["Lighting"]
+      direction LR
+      AL["AmbientLight"]
+      DL["DirectionalLight<br/>(sun/moon)"]
+      FL["FillLight"]
+      CL["PointLight<br/>(ceiling spot)"]
+    end
+
+    subgraph CAM["Camera"]
+      PC["PerspectiveCamera<br/>FOV 45°"]
+      OC["OrbitControls<br/>damping enabled"]
+      PC --- OC
+    end
+
+    subgraph GSAP_A["GSAP Animation Engine"]
+      direction LR
+      G1["Walk-up Timeline<br/>z: 8 → 3.2"]
+      G2["Card Insert<br/>arm raise → slot"]
+      G3["POV Camera<br/>z: 2.0 look at ATM"]
+      G4["Cash Dispense<br/>slot → tray"]
+      G5["Key Tap<br/>arm micro-bounce"]
+      G6["Env Tweens<br/>light/color GSAP.to()"]
+    end
+  end
+
+  %% ── ENV SYSTEM ─────────────────────────────────────────────────
+  subgraph ENV_SYS["  🌍  ENVIRONMENT SYSTEM"]
+    direction LR
+    EP["<b>Presets</b><br/>day · sunset · night<br/>bgHex · fogNear/Far<br/>ambI · sunI · fillI<br/>wallHex · floorHex<br/>ceilI · screenEmI"]
+    EF["<b>setEnvironment(name)</b><br/>GSAP tween × 10 targets<br/>duration 1.8s ease"]
+    EP --> EF
+  end
+
+  %% ── HTML OVERLAY ───────────────────────────────────────────────
+  subgraph OVERLAY["  🖥️  HTML / CSS OVERLAY  (z:10–20)"]
+    direction TB
+    TOP_B["<b>#top-bar</b><br/>brand · project label"]
+    ENV_P["<b>#env-panel</b><br/>☀️ Day | 🌅 Sunset | 🌙 Night<br/>glassmorphism pill"]
+    START_O["<b>#start-overlay</b><br/>glass card<br/>Walk Up btn · Tutorial btn"]
+    ATM_SCR["<b>#atm-screen</b><br/>hardware-buttons L/R (×4)<br/>screen-display (#screen-content)<br/>keypad-section (4×4 grid)"]
+  end
+
+  %% ── STATE MACHINE ──────────────────────────────────────────────
+  subgraph FSM["  ⚙️  ATM STATE MACHINE"]
+    direction TB
+    STATES["<b>18 States</b><br/>WELCOME · PIN · MENU<br/>WITHDRAWAL · OTHER_AMOUNT<br/>BALANCE · MINI_STATEMENT<br/>TRANSFER_ACCOUNT/AMOUNT/CONFIRM<br/>CHANGE_PIN_OLD/NEW/CONFIRM<br/>AIRTIME_NETWORK/PHONE/AMOUNT<br/>PROCESSING · SUCCESS · SUCCESS_MSG<br/>RECEIPT_PROMPT · PRINTING_RECEIPT<br/>ANOTHER_TX · INSUFFICIENT_FUNDS<br/>ACCOUNT_NOT_FOUND"]
+    RS["<b>renderState()</b><br/>→ innerHTML of #screen-content"]
+    HHB["<b>handleHwButton(side, idx)</b><br/>routes L1–L4, R1–R4 clicks"]
+    HEN["<b>handleEnter()</b><br/>validates + advances state"]
+    GS["<b>goState(name, input)</b><br/>sets currentState · triggers tutorial"]
+    STATES --> GS --> RS
+    GS --> HHB
+    GS --> HEN
+  end
+
+  %% ── AUDIO ──────────────────────────────────────────────────────
+  subgraph AUDIO_L["  🔊  AUDIO LAYER"]
+    direction LR
+    WA["<b>Web Audio API</b><br/>OscillatorNode · GainNode<br/>BiquadFilter · BufferSource<br/><br/>sfxKey · sfxCard · sfxCash<br/>sfxReceipt · sfxSuccess<br/>sfxError · sfxScreen"]
+    WS["<b>Web Speech API</b><br/>SpeechSynthesisUtterance<br/>tutorialSpeak(key)<br/>18 state cue strings<br/>rate 0.88 · pitch 1.05"]
+  end
+
+  %% ── INPUT ──────────────────────────────────────────────────────
+  subgraph INPUT_L["  🎮  INPUT SYSTEM"]
+    direction LR
+    WASD_I["<b>WASD Keys</b><br/>free roam · turn<br/>bounds clamping<br/>walk cycle animation"]
+    KB_I["<b>Keyboard</b><br/>0–9 · Enter · Backspace · Esc<br/>→ ATM state machine"]
+    MOUSE_I["<b>Mouse / Touch</b><br/>OrbitControls<br/>hw-btn clicks<br/>env-panel clicks<br/>screen-btn clicks"]
+  end
+
+  %% ── EDGES ──────────────────────────────────────────────────────
+  BUILD --> THREE
+  BUILD --> OVERLAY
+  BUILD --> FSM
+
+  OVERLAY -- "click events\ndata-hw routing" --> FSM
+  FSM -- "renderState()\ninnerHTML" --> ATM_SCR
+  FSM -- "triggerDispense()\nplayTimeline()" --> GSAP_A
+  FSM -- "sfx calls" --> WA
+  FSM -- "tutorialSpeak()" --> WS
+  ENV_P -- "setEnvironment()" --> EF
+  EF -- "tween lights\n& materials" --> LIGHTS
+  EF -- "tween bg/fog\n& emissive" --> SCENE_G
+  WASD_I -- "position/rotation" --> CHAR_M
+  WASD_I -- "lerp target" --> OC
+  KB_I --> FSM
+  MOUSE_I --> OC
+  MOUSE_I --> OVERLAY
+
+  %% ── STYLES ─────────────────────────────────────────────────────
+  classDef buildNode  fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+  classDef threeNode  fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+  classDef overlayNode fill:#dcfce7,stroke:#22c55e,color:#166534
+  classDef fsmNode    fill:#fef3c7,stroke:#f59e0b,color:#92400e
+  classDef audioNode  fill:#fce7f3,stroke:#ec4899,color:#9d174d
+  classDef inputNode  fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95
+  classDef envNode    fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
+
+  class WP,ENTRY,OUT buildNode
+  class ATM_M,CHAR_M,ROOM_M,AL,DL,FL,CL,PC,OC,G1,G2,G3,G4,G5,G6 threeNode
+  class TOP_B,ENV_P,START_O,ATM_SCR overlayNode
+  class STATES,RS,HHB,HEN,GS fsmNode
+  class WA,WS audioNode
+  class WASD_I,KB_I,MOUSE_I inputNode
+  class EP,EF envNode
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> Build System (Webpack 5)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Three.js 3D Engine</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> HTML/CSS Overlay</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> ATM State Machine (FSM)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div> Environment System</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div> Audio Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Input System</div>
+  </div>
+
+  <!-- Key files table -->
+  <table class="key-table" style="margin-top:28px">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Role</th>
+        <th>Key Contents</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>src/script.js</code></td>
+        <td>Entire application (~1400 lines)</td>
+        <td>Three.js scene, GSAP timelines, ATM FSM, Web Audio, Web Speech, WASD, Environment system</td>
+      </tr>
+      <tr>
+        <td><code>src/index.html</code></td>
+        <td>HTML shell</td>
+        <td>Canvas, #top-bar, #env-panel, #start-overlay, #atm-screen (hw buttons + keypad), #kb-hint</td>
+      </tr>
+      <tr>
+        <td><code>src/style.css</code></td>
+        <td>All styling</td>
+        <td>Glassmorphism overlay, ATM panel, keypad, env panel, state-area classes, body[data-env] glow</td>
+      </tr>
+      <tr>
+        <td><code>bundler/</code></td>
+        <td>Webpack 5 config split</td>
+        <td>webpack.common.js → .dev.js (HMR port 8081) + .prod.js (content-hash, minification)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div><!-- /page 1 -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2 — FLOWCHART
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <h1>System Flowchart — ATM Transaction Flow
+      <span>C3231 – Computer Graphics &amp; Multimedia · UBA Virtual ATM Simulation</span>
+    </h1>
+    <span class="badge">Flowchart</span>
+  </div>
+
+  <div class="project-meta">
+    <div class="meta-chip">States <b>18 FSM States</b></div>
+    <div class="meta-chip">Transactions <b>Withdrawal · Transfer · Balance · Statement · Change PIN · Airtime</b></div>
+    <div class="meta-chip">Guards <b>Balance check · PIN length · Account lookup · Amount validation</b></div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-card-header">
+      <div class="icon-box" style="background:#fef3c7">⚙️</div>
+      <div>
+        <h2>Complete ATM Interaction Flowchart</h2>
+        <p>From app start through every transaction path to session end. Includes all guard conditions and error states.</p>
+      </div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+%%{init:{"theme":"base","themeVariables":{"primaryColor":"#fef3c7","primaryTextColor":"#1e2330","primaryBorderColor":"#f59e0b","lineColor":"#64748b","secondaryColor":"#dbeafe","tertiaryColor":"#dcfce7","background":"#ffffff","mainBkg":"#ffffff","nodeBorder":"#94a3b8","clusterBkg":"#f8fafc","edgeLabelBackground":"#ffffff","fontSize":"13px"}}}%%
+
+flowchart TD
+
+  %% ── START ───────────────────────────────────────────────────────────
+  START(["▶  App Loaded\n#start-overlay visible"])
+  START --> CHOICE{"User action?"}
+  CHOICE -->|"Click Walk Up"| WALK
+  CHOICE -->|"Click Guide Me"| TUT["tutorialMode = true\ntutorialSpeak('START')\n→ auto-clicks Walk Up after 3.2s"]
+  TUT --> WALK
+
+  WALK["GSAP Walk-up Timeline\ncharacter z: 8 → 3.2\ncamera overview → z:7.0"]
+  WALK --> CARD["Arm raises → card slides into slot\nsfxCard() beep\nCard mesh: scene → armPivotL"]
+  CARD --> POV["POV Camera\ncamera z: 7 → 2.0\nlooks at ATM screen (0, 3.1, 0.8)\ncharacter invisible behind camera"]
+  POV --> WEL
+
+  %% ── WELCOME ─────────────────────────────────────────────────────────
+  WEL{{"WELCOME\nPress any key/button"}}
+  WEL -->|"0–9 / hw-button"| PIN
+  WEL -->|"CANCEL / Esc"| EXIT_W["endSession()\nno cash → simple walk-away"]
+  EXIT_W --> RESET
+
+  %% ── PIN ─────────────────────────────────────────────────────────────
+  PIN{{"PIN ENTRY\n(4 dots)"}}
+  PIN -->|"digit pressed\n(sfxKey + arm tap)"| PIN
+  PIN -->|"CANCEL"| WEL
+  PIN -->|"ENTER\n(4 digits present)"| AUTH["sfxCard()\ncurrentInput cleared"]
+  AUTH --> MENU
+
+  %% ── MAIN MENU ───────────────────────────────────────────────────────
+  MENU{{"MAIN MENU\n6 options"}}
+  MENU -->|"L1: Withdrawal"| W_AMT
+  MENU -->|"R1: Balance"| BAL
+  MENU -->|"L2: Transfer"| TR_AC
+  MENU -->|"R2: Statement"| STMT
+  MENU -->|"L3: Change PIN"| CP_OLD
+  MENU -->|"R3: Airtime"| AIR_NET
+  MENU -->|"Cancel"| WEL
+
+  %% ── WITHDRAWAL PATH ─────────────────────────────────────────────────
+  W_AMT{{"WITHDRAWAL\nSelect Amount"}}
+  W_AMT -->|"Quick: 100/500/1000/2000"| W_GUARD
+  W_AMT -->|"L3: Other Amount"| W_OTHER{{"OTHER AMOUNT\ntype digits"}}
+  W_AMT -->|"Back"| MENU
+  W_OTHER -->|"ENTER"| W_GUARD
+
+  W_GUARD{"amt > 0\namt % 10 = 0\namt ≤ balance?"}
+  W_GUARD -->|"No"| INSUF[["INSUFFICIENT FUNDS\n❌ error sound"]]
+  W_GUARD -->|"Yes"| W_PROC
+  INSUF --> MENU
+
+  W_PROC["balance -= amt\ntxHistory.unshift()"]
+  W_PROC --> PROC1{{"PROCESSING\nspinner 2.2s"}}
+  PROC1 -->|"timeout 2.2s"| SUCC_W{{"SUCCESS\nDispensing GHS x\nsfxSuccess() jingle"}}
+  SUCC_W -->|"2.4s"| REC
+
+  %% ── BALANCE PATH ────────────────────────────────────────────────────
+  BAL{{"BALANCE DISPLAY\nfmtGhs(accountBalance)"}}
+  BAL -->|"Home btn"| ANO
+
+  %% ── TRANSFER PATH ───────────────────────────────────────────────────
+  TR_AC{{"TRANSFER\nAccount No. (10 digits)"}}
+  TR_AC -->|"ENTER"| TR_LOOK{"fakeAccounts\n[acct] exists?"}
+  TR_AC -->|"Back"| MENU
+  TR_LOOK -->|"No"| ACNF[["ACCOUNT NOT FOUND\n❌"]]
+  ACNF --> MENU
+  TR_LOOK -->|"Yes"| TR_AMT{{"TRANSFER AMOUNT\nname + bank shown"}}
+  TR_AMT -->|"ENTER"| TR_CFM{{"CONFIRM TRANSFER\ndetails review"}}
+  TR_AMT -->|"Back"| TR_AC
+  TR_CFM -->|"Confirm (L3)"| TR_PROC["balance -= amt\ntxHistory.unshift()"]
+  TR_CFM -->|"Cancel (R4)"| MENU
+  TR_PROC --> PROC2{{"PROCESSING\n2s"}}
+  PROC2 --> SMSG_T{{"SUCCESS MSG\ntransfer confirmed"}}
+  SMSG_T -->|"OK"| ANO
+
+  %% ── STATEMENT PATH ──────────────────────────────────────────────────
+  STMT{{"MINI STATEMENT\n5-row history\ncr/dr colour coded"}}
+  STMT -->|"Home"| ANO
+
+  %% ── CHANGE PIN PATH ─────────────────────────────────────────────────
+  CP_OLD{{"CHANGE PIN\nCurrent PIN (4 dots)"}}
+  CP_OLD -->|"4 digits + ENTER"| CP_NEW{{"NEW PIN\n(4 dots)"}}
+  CP_NEW -->|"4 digits + ENTER"| CP_CFM{{"CONFIRM NEW PIN"}}
+  CP_CFM -->|"matches newPinFirst"| CP_PROC["PROCESSING → SUCCESS_MSG"]
+  CP_CFM -->|"mismatch\nsfxError()"| CP_NEW
+  CP_PROC --> ANO
+
+  %% ── AIRTIME PATH ────────────────────────────────────────────────────
+  AIR_NET{{"AIRTIME\nSelect Network\nMTN/Vodafone/AirtelTigo/Glo"}}
+  AIR_NET -->|"network selected"| AIR_PH{{"PHONE NUMBER\n10 digits"}}
+  AIR_NET -->|"Back"| MENU
+  AIR_PH -->|"ENTER"| AIR_AMT{{"AIRTIME AMOUNT\nquick 5/10/20/50\nor custom"}}
+  AIR_PH -->|"Back"| AIR_NET
+  AIR_AMT -->|"amount"| AIR_GUARD{"amt ≤ balance?"}
+  AIR_AMT -->|"Back"| AIR_PH
+  AIR_GUARD -->|"No"| INSUF2[["INSUFFICIENT\n❌"]]
+  INSUF2 --> MENU
+  AIR_GUARD -->|"Yes"| AIR_PROC["balance -= amt\ntxHistory.unshift()"]
+  AIR_PROC --> PROC3{{"PROCESSING\n2s"}}
+  PROC3 --> SMSG_A{{"SUCCESS MSG\nairtime sent"}}
+  SMSG_A -->|"OK"| ANO
+
+  %% ── RECEIPT ─────────────────────────────────────────────────────────
+  REC{{"RECEIPT PROMPT\nPrint receipt?"}}
+  REC -->|"Yes, Print (L3)"| PRNT{{"PRINTING RECEIPT\nsfxReceipt()\nreceipt mesh slides out"}}
+  PRNT -->|"2.2s"| ANO
+  REC -->|"No Thanks (R3)"| ANO
+
+  %% ── ANOTHER TRANSACTION ─────────────────────────────────────────────
+  ANO{{"ANOTHER TRANSACTION?\nYes / No"}}
+  ANO -->|"Yes (L3)"| MENU
+  ANO -->|"No Exit (R3)"| EXIT_S
+
+  %% ── SESSION END ─────────────────────────────────────────────────────
+  EXIT_S["endSession()"]
+  EXIT_S --> CASH_Q{"dispenseCash > 0?"}
+  CASH_Q -->|"Yes (withdrawal)"| CASH_AN["playCashDispenseAndWalkAway()\ncash slides from slot → tray\ncard ejects\narm collects card + cash\ncharacter turns → walks away\ncamera pulls back → resets"]
+  CASH_Q -->|"No (non-cash)"| WALK_AN["simple walk-away\ncard ejects → hand\ncharacter turns + walks off"]
+  CASH_AN --> RESET
+  WALK_AN --> RESET
+
+  RESET(["🔄 canRoam = true\nstartOverlay shows\ncamera reset to (0,4,13)\ncharacter reset to z=8"])
+  RESET --> START
+
+  %% ── STYLES ──────────────────────────────────────────────────────────
+  classDef start     fill:#1e2330,color:#fff,stroke:#1e2330,border-radius:20px
+  classDef welcome   fill:#dbeafe,stroke:#3b82f6,color:#1e40af
+  classDef menu      fill:#fef3c7,stroke:#f59e0b,color:#78350f
+  classDef txState   fill:#dcfce7,stroke:#22c55e,color:#14532d
+  classDef procState fill:#e0e7ff,stroke:#6366f1,color:#3730a3
+  classDef succState fill:#d1fae5,stroke:#10b981,color:#064e3b
+  classDef errState  fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+  classDef endState  fill:#f3f4f6,stroke:#6b7280,color:#374151
+
+  class START,RESET start
+  class WEL,PIN welcome
+  class MENU,W_AMT,BAL,STMT,TR_AC,TR_AMT,TR_CFM,W_OTHER,CP_OLD,CP_NEW,CP_CFM,AIR_NET,AIR_PH,AIR_AMT,REC,ANO menu
+  class W_GUARD,TR_LOOK,AIR_GUARD,CASH_Q txState
+  class PROC1,PROC2,PROC3,SUCC_W,SMSG_T,SMSG_A,PRNT procState
+  class AUTH,W_PROC,TR_PROC,CP_PROC,AIR_PROC,TUT succState
+  class INSUF,INSUF2,ACNF errState
+  class WALK,CARD,POV,EXIT_W,EXIT_S,CASH_AN,WALK_AN endState
+      </div>
+    </div>
+  </div>
+
+  <!-- State reference table -->
+  <table class="key-table" style="margin-top:28px">
+    <thead>
+      <tr>
+        <th>State</th>
+        <th>Description</th>
+        <th>Entry Trigger</th>
+        <th>Exit Transitions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>WELCOME</code></td><td>Idle — "Press any button"</td><td>After PIN auth or CANCEL from any state</td><td>Any key → PIN · CANCEL → endSession()</td></tr>
+      <tr><td><code>PIN</code></td><td>4-digit PIN entry (dots)</td><td>Any key on WELCOME</td><td>4 digits + ENTER → MENU · CANCEL → WELCOME</td></tr>
+      <tr><td><code>MENU</code></td><td>Main menu grid (6 options)</td><td>Correct PIN or ANOTHER_TX Yes</td><td>Button press → 6 sub-flows · CANCEL → WELCOME</td></tr>
+      <tr><td><code>WITHDRAWAL</code></td><td>Quick amount selection</td><td>L1 from MENU</td><td>Amount → initiateWithdrawal() · L3 → OTHER_AMOUNT</td></tr>
+      <tr><td><code>PROCESSING</code></td><td>Spinner — 2–2.2s timeout</td><td>Any confirmed transaction</td><td>timeout → SUCCESS or SUCCESS_MSG</td></tr>
+      <tr><td><code>SUCCESS</code></td><td>Cash dispense confirmation</td><td>initiateWithdrawal OK</td><td>2.4s → RECEIPT_PROMPT</td></tr>
+      <tr><td><code>SUCCESS_MSG</code></td><td>Non-cash success</td><td>Transfer / Airtime / PIN change</td><td>OK → ANOTHER_TX</td></tr>
+      <tr><td><code>RECEIPT_PROMPT</code></td><td>Print Y/N prompt</td><td>After SUCCESS (cash withdrawal)</td><td>Yes → PRINTING_RECEIPT · No → ANOTHER_TX</td></tr>
+      <tr><td><code>ANOTHER_TX</code></td><td>Continue Y/N prompt</td><td>Balance/Statement/Non-cash success/Receipt</td><td>Yes → MENU · No → endSession()</td></tr>
+      <tr><td><code>INSUFFICIENT_FUNDS</code></td><td>Balance guard failure</td><td>amt > accountBalance</td><td>Back → MENU</td></tr>
+    </tbody>
+  </table>
+
+</div><!-- /page 2 -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, curve: 'basis', padding: 20 },
+    fontFamily: "'Segoe UI', system-ui, sans-serif"
+  });
+</script>
+</body>
+</html>

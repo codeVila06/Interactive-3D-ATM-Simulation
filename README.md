@@ -174,5 +174,4 @@ IDLE → WELCOME → PIN → MENU → WITHDRAW → DISPENSING → EJECT → IDLE
 - [Three.js](https://threejs.org) — Ricardo Cabello (mrdoob) and contributors
 - [GSAP](https://gsap.com) — GreenSock LLC
 - W3C Web Audio API and Web Speech API specifications
-
-
+-Jesudunyin.tm
